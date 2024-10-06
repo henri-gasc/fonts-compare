@@ -42,7 +42,12 @@ impl Option {
         ui.text_edit_multiline(text);
     }
 
-    pub fn draw(&mut self, ui: &mut egui::Ui, text: &mut String) {
+    pub fn draw(
+        &mut self,
+        ui: &mut egui::Ui,
+        text: &mut String,
+        fonts: &mut egui::FontDefinitions,
+    ) {
         ui.vertical_centered(|ui| {
             // Need this, otherwise ComboBox is not centered
             ui.columns(3, |cols| {
@@ -56,7 +61,7 @@ impl Option {
             self.write(ui, text);
 
             if (self.selected != "Default") && !self.is_name_in_fonts(ui, &self.selected) {
-                self.add_selected_font(ui);
+                self.add_selected_font(ui, fonts);
             }
         });
     }
@@ -75,11 +80,10 @@ impl Option {
             });
     }
 
-    fn add_selected_font(&mut self, ui: &egui::Ui) {
+    fn add_selected_font(&mut self, ui: &egui::Ui, fonts: &mut egui::FontDefinitions) {
         let system_fonts = SystemSource::new()
             .select_family_by_name(&self.selected)
             .unwrap();
-        let mut fonts = egui::FontDefinitions::default();
 
         let mut new_font = self.selected.clone();
         for f in system_fonts.fonts() {

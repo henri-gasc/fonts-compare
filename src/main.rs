@@ -21,6 +21,7 @@ struct MyApp {
     left: Option,
     right: Option,
     zoom: f32,
+    fonts: egui::FontDefinitions,
 }
 
 impl MyApp {
@@ -39,6 +40,7 @@ impl MyApp {
                 exact_font: "".to_string(),
             },
             zoom: 2.0,
+            fonts: egui::FontDefinitions::default(),
         }
     }
 
@@ -73,8 +75,10 @@ impl eframe::App for MyApp {
                 }
                 ui.horizontal(|ui| {
                     ui.columns(2, |cols| {
-                        self.left.draw(&mut cols[0], &mut self.text);
-                        self.right.draw(&mut cols[1], &mut self.text);
+                        self.left
+                            .draw(&mut cols[0], &mut self.text, &mut self.fonts);
+                        self.right
+                            .draw(&mut cols[1], &mut self.text, &mut self.fonts);
                     });
                 });
             });
