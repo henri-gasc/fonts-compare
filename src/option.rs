@@ -6,6 +6,7 @@ pub struct Option {
     pub name: String,
     pub selected: String,
     pub exact_font: String,
+    pub regular: String,
 }
 
 impl Default for Option {
@@ -14,6 +15,7 @@ impl Default for Option {
             name: "box".to_string(),
             selected: "Default".to_string(),
             exact_font: "".to_string(),
+            regular: "".to_string(),
         };
     }
 }
@@ -72,7 +74,7 @@ impl Option {
                 if !self.is_name_in_fonts(ui, &self.selected) {
                     self.add_selected_font(ui, fonts);
                 }
-                self.draw_variants(ui);
+                self.draw_variants(ui, fonts);
             }
         });
     }
@@ -116,6 +118,8 @@ impl Option {
             // By default, search for the regular variant
             if poss_font.ends_with("-Regular") {
                 new_font = poss_font.clone();
+            } else if poss_font.find('-').is_none() {
+                new_font = poss_font.clone();
             }
 
             // Store the font
@@ -128,6 +132,7 @@ impl Option {
 
         ui.ctx().set_fonts(fonts.clone());
         self.exact_font = new_font.clone();
+        self.regular = new_font.clone();
     }
 
     fn link_font(&mut self, fonts: &mut egui::FontDefinitions, new_font: String) {
@@ -145,18 +150,37 @@ impl Option {
         if let Some(n) = font_name.find('-') {
             return font_name[n + 1..].to_string();
         }
-        return font_name.to_string();
+        return "".to_string();
     }
 
-    fn draw_variants(&self, ui: &mut egui::Ui) {
+    fn draw_variants(&mut self, ui: &mut egui::Ui, fonts: &mut egui::FontDefinitions) {
         let binding = self.get_family();
         let family = binding.fonts();
 
-        for handle in family {
-            let font = handle.load().unwrap();
-            let name = font.postscript_name().unwrap_or(self.exact_font.clone());
+        ui.columns(3, |cols| {
+            // egui::Grid::new(format!("{}-grid", self.name)).show(ui, |ui| {
+            let mut i = 0;
+            for handle in family {
+                let font = handle.load().unwrap();
+                let name = font.postscript_name().unwrap_or(self.exact_font.clone());
+                let var = self.variance(&name);
+                if (var == "") || (name == self.exact_font) || name.ends_with("-Regular") {
+                    continue;
+                }
 
-            ui.label(self.variance(&name));
-        }
+                if cols[i].button(var).clicked() {
+                    self.exact_font = name.clone();
+                }
+                i += 1;
+                if i == 3 {
+                    i = 0;
+                }
+            }
+
+            // Always add regular option
+            if cols[i].button("Regular").clicked() {
+                self.exact_font = self.regular.clone();
+            }
+        });
     }
 }
