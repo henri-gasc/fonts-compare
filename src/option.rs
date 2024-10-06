@@ -81,14 +81,24 @@ impl Option {
     }
 
     fn add_selected_font(&mut self, ui: &egui::Ui, fonts: &mut egui::FontDefinitions) {
-        let system_fonts = SystemSource::new()
+        let family = SystemSource::new()
             .select_family_by_name(&self.selected)
             .unwrap();
 
-        let mut new_font = self.selected.clone();
-        for f in system_fonts.fonts() {
-            let font = f.load().unwrap();
+        // Get first value (to be sure the font is available)
+        let mut new_font = family
+            .fonts()
+            .first()
+            .unwrap()
+            .load()
+            .unwrap()
+            .postscript_name()
+            .unwrap();
+
+        for handle in family.fonts() {
+            let font = handle.load().unwrap();
             let poss_font = font.postscript_name().unwrap_or("Default".to_string());
+            // By default, search for the regular variant
             if poss_font.ends_with("-Regular") {
                 new_font = poss_font.clone();
             }
