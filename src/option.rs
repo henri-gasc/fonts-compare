@@ -8,6 +8,16 @@ pub struct Option {
     pub exact_font: String,
 }
 
+impl Default for Option {
+    fn default() -> Self {
+        return Self {
+            name: "box".to_string(),
+            selected: "Default".to_string(),
+            exact_font: "".to_string(),
+        };
+    }
+}
+
 impl Option {
     fn is_name_in_fonts(&self, ui: &egui::Ui, name: &str) -> bool {
         // Test load status of font. Use fallback if not found

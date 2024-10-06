@@ -31,13 +31,11 @@ impl MyApp {
             text: "The quick brown fox jumps over the lazy dog".to_owned(),
             left: Option {
                 name: "Left box".to_owned(),
-                selected: "Default".to_owned(),
-                exact_font: "".to_string(),
+                ..Default::default()
             },
             right: Option {
                 name: "Right box".to_owned(),
-                selected: "Default".to_owned(),
-                exact_font: "".to_string(),
+                ..Default::default()
             },
             zoom: 2.0,
             fonts: egui::FontDefinitions::default(),
