@@ -24,19 +24,17 @@ impl Option {
     }
 
     fn write(&self, ui: &mut egui::Ui, text: &mut String) {
-        if self.selected != "Default" {
-            if self.is_name_in_fonts(ui, &self.selected) {
-                // Write text with font
-                let multi = egui::TextEdit::multiline(text);
-                multi
-                    .font(egui::FontId {
-                        size: 12.0,
-                        // self.fonts.font_data.first_key_value().unwrap().1.tweak.scale,
-                        family: egui::FontFamily::Name(self.selected.clone().into()),
-                    })
-                    .ui(ui);
-                return;
-            }
+        if (self.selected != "Default") && self.is_name_in_fonts(ui, &self.selected) {
+            // Write text with font
+            let multi = egui::TextEdit::multiline(text);
+            multi
+                .font(egui::FontId {
+                    size: 12.0,
+                    // self.fonts.font_data.first_key_value().unwrap().1.tweak.scale,
+                    family: egui::FontFamily::Name(self.selected.clone().into()),
+                })
+                .ui(ui);
+            return;
         }
 
         ui.text_edit_multiline(text);
@@ -103,19 +101,24 @@ impl Option {
                 new_font = poss_font.clone();
             }
 
+            // Store the font
             let data = font.copy_font_data().unwrap().to_vec();
             fonts
                 .font_data
                 .insert(poss_font.clone(), egui::FontData::from_owned(data));
         }
+        self.link_font(fonts, new_font.clone());
 
+        ui.ctx().set_fonts(fonts.clone());
+        self.exact_font = new_font.clone();
+    }
+
+    fn link_font(&mut self, fonts: &mut egui::FontDefinitions, new_font: String) {
+        // Link the font to the family
         fonts
             .families
             .entry(egui::FontFamily::Name(self.selected.clone().into()))
             .or_default()
-            .push(new_font.clone());
-
-        ui.ctx().set_fonts(fonts.clone());
-        self.exact_font = new_font.clone();
+            .push(new_font);
     }
 }
