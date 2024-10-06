@@ -1,5 +1,5 @@
 use eframe::egui::{self, Widget};
-use font_kit::source::SystemSource;
+use font_kit::{family_handle::FamilyHandle, source::SystemSource};
 
 #[derive(Clone)]
 pub struct Option {
@@ -58,8 +58,11 @@ impl Option {
 
             self.write(ui, text);
 
-            if (self.selected != "Default") && !self.is_name_in_fonts(ui, &self.selected) {
-                self.add_selected_font(ui, fonts);
+            if self.selected != "Default" {
+                if !self.is_name_in_fonts(ui, &self.selected) {
+                    self.add_selected_font(ui, fonts);
+                }
+                self.draw_variants(ui);
             }
         });
     }
@@ -78,14 +81,18 @@ impl Option {
             });
     }
 
-    fn add_selected_font(&mut self, ui: &egui::Ui, fonts: &mut egui::FontDefinitions) {
-        let family = SystemSource::new()
+    fn get_family(&self) -> FamilyHandle {
+        return SystemSource::new()
             .select_family_by_name(&self.selected)
             .unwrap();
+    }
+
+    fn add_selected_font(&mut self, ui: &egui::Ui, fonts: &mut egui::FontDefinitions) {
+        let binding = self.get_family();
+        let family = binding.fonts();
 
         // Get first value (to be sure the font is available)
         let mut new_font = family
-            .fonts()
             .first()
             .unwrap()
             .load()
@@ -93,7 +100,7 @@ impl Option {
             .postscript_name()
             .unwrap();
 
-        for handle in family.fonts() {
+        for handle in family {
             let font = handle.load().unwrap();
             let poss_font = font.postscript_name().unwrap_or("Default".to_string());
             // By default, search for the regular variant
@@ -115,10 +122,31 @@ impl Option {
 
     fn link_font(&mut self, fonts: &mut egui::FontDefinitions, new_font: String) {
         // Link the font to the family
-        fonts
+        let font = fonts
             .families
             .entry(egui::FontFamily::Name(self.selected.clone().into()))
-            .or_default()
-            .push(new_font);
+            .or_default();
+        // Remove the other fonts, keep only the last
+        font.clear();
+        font.push(new_font);
+    }
+
+    fn variance(&self, font_name: &str) -> String {
+        if let Some(n) = font_name.find('-') {
+            return font_name[n + 1..].to_string();
+        }
+        return font_name.to_string();
+    }
+
+    fn draw_variants(&self, ui: &mut egui::Ui) {
+        let binding = self.get_family();
+        let family = binding.fonts();
+
+        for handle in family {
+            let font = handle.load().unwrap();
+            let name = font.postscript_name().unwrap_or(self.exact_font.clone());
+
+            ui.label(self.variance(&name));
+        }
     }
 }
