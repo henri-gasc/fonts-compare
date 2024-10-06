@@ -1,5 +1,8 @@
 use eframe::egui;
 
+mod option;
+use option::Option;
+
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default(),
@@ -13,28 +16,6 @@ fn main() -> eframe::Result {
     )
 }
 
-#[derive(Clone)]
-struct Option {
-    name: String,
-    selected: String,
-}
-
-impl Option {
-    fn draw(&self, ui: &mut egui::Ui, text: &mut String) {
-        ui.vertical_centered(|ui| {
-            ui.label(&self.name);
-            ui.text_edit_multiline(text);
-        });
-    }
-}
-
-#[derive(Debug, PartialEq, Copy, Clone)]
-enum Selection {
-    First,
-    Second,
-    Third,
-}
-
 struct MyApp {
     text: String,
     left: Option,
@@ -44,17 +25,20 @@ struct MyApp {
 
 impl MyApp {
     fn new() -> Self {
+        // let fc = Fontconfig::new().unwrap();
         Self {
             text: "The quick brown fox jumps over the lazy dog".to_owned(),
             left: Option {
                 name: "Left box".to_owned(),
                 selected: "Default".to_owned(),
+                exact_font: "".to_string(),
             },
             right: Option {
                 name: "Right box".to_owned(),
                 selected: "Default".to_owned(),
+                exact_font: "".to_string(),
             },
-            zoom: 1.0,
+            zoom: 2.0,
         }
     }
 
@@ -84,6 +68,8 @@ impl eframe::App for MyApp {
                     ui.label(
                         egui::RichText::new("They are the same font").color(egui::Color32::RED),
                     );
+                } else {
+                    ui.label("");
                 }
                 ui.horizontal(|ui| {
                     ui.columns(2, |cols| {
