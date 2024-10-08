@@ -185,7 +185,7 @@ impl Option {
                 let font = handle.load().unwrap();
                 let name = font.postscript_name().unwrap_or(self.exact_font.clone());
                 let var = self.variance(&name);
-                if (var == "") || (name == self.exact_font) || name.ends_with("-Regular") {
+                if (var == "") || (name == self.selected) || name.ends_with("-Regular") {
                     continue;
                 }
 
