@@ -186,6 +186,14 @@ impl Option {
         return "".to_string();
     }
 
+    fn font_name(&self, name: &str) -> String {
+        let mut end = name.len();
+        if let Some(n) = name.find('-') {
+            end = n;
+        }
+        return name[..end].to_string();
+    }
+
     fn get_text(&self, text: &str, condition: bool) -> egui::RichText {
         let mut rich = egui::RichText::new(text);
         if condition {
@@ -233,6 +241,14 @@ impl Option {
                     let font = handle.load().unwrap();
                     let name = font.postscript_name().unwrap_or(self.exact_font.clone());
                     let var = self.variance(&name);
+
+                    // After some thinking, I don't want this filter
+                    // if self.font_name(&name) != self.selected {
+                    //     // Font may be from another type.
+                    //     // If you look at the font Antykwa Torunska (from dev-texlive/texlive-fontsextra), you would have 3 different italics type, if not for this condition
+                    //     continue;
+                    // }
+
                     if self.is_regular(&name) {
                         has_regular = true;
                         continue;
