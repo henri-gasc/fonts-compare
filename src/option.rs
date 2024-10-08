@@ -176,6 +176,7 @@ impl Option {
         let num_columns = 3;
         let binding = self.get_family();
         let family = binding.fonts();
+        let mut changed = false;
 
         ui.columns(num_columns, |cols| {
             // egui::Grid::new(format!("{}-grid", self.name)).show(ui, |ui| {
@@ -190,6 +191,8 @@ impl Option {
 
                 if cols[i % num_columns].button(var).clicked() {
                     self.exact_font = name.clone();
+                    self.link_font(fonts, name);
+                    changed = true;
                 }
                 i += 1;
             }
@@ -198,8 +201,15 @@ impl Option {
                 // Always add regular option
                 if cols[i % num_columns].button("Regular").clicked() {
                     self.exact_font = self.regular.clone();
+                    self.link_font(fonts, self.regular.clone());
+                    changed = true;
                 }
             }
         });
+
+        // Apply change in fonts, only if they changed (button was clicked)
+        if changed {
+            ui.ctx().set_fonts(fonts.clone());
+        }
     }
 }
