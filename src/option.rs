@@ -179,6 +179,7 @@ impl Option {
         let family = binding.fonts();
         let mut changed = false;
         let mut is_regular = true;
+        let mut has_regular = false;
 
         ui.columns(num_columns, |cols| {
             let mut i = 0;
@@ -187,6 +188,7 @@ impl Option {
                 let name = font.postscript_name().unwrap_or(self.exact_font.clone());
                 let var = self.variance(&name);
                 if (var == "") || (name == self.selected) || name.ends_with("-Regular") {
+                    has_regular = true;
                     continue;
                 }
                 // Change color if selected
@@ -205,7 +207,7 @@ impl Option {
             }
 
             // Add regular option if we add other options
-            if i != 0 {
+            if (i != 0) && has_regular {
                 // Change color if selected
                 let mut text = egui::RichText::new("Regular");
                 if is_regular {
