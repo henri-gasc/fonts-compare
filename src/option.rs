@@ -218,44 +218,46 @@ impl Option {
         let mut changed = false;
         let mut has_regular = false;
 
-        ui.columns(self.num_columns, |cols| {
-            let mut i = 0;
-            for handle in family {
-                let font = handle.load().unwrap();
-                let name = font.postscript_name().unwrap_or(self.exact_font.clone());
-                let var = self.variance(&name);
-                if self.is_regular(&name) {
-                    has_regular = true;
-                    continue;
+        ui.horizontal(|ui| {
+            ui.columns(self.num_columns, |cols| {
+                let mut i = 0;
+                for handle in family {
+                    let font = handle.load().unwrap();
+                    let name = font.postscript_name().unwrap_or(self.exact_font.clone());
+                    let var = self.variance(&name);
+                    if self.is_regular(&name) {
+                        has_regular = true;
+                        continue;
+                    }
+
+                    self.draw_button(
+                        &mut cols[i % self.num_col_use + 1],
+                        &var,
+                        name == self.exact_font,
+                        name,
+                        fonts,
+                        &mut changed,
+                    );
+                    i += 1;
                 }
 
-                self.draw_button(
-                    &mut cols[i % self.num_col_use + 1],
-                    &var,
-                    name == self.exact_font,
-                    name,
-                    fonts,
-                    &mut changed,
-                );
-                i += 1;
-            }
+                // Add regular option if we add other options
+                if (i != 0) && has_regular {
+                    self.draw_button(
+                        &mut cols[i % self.num_col_use + 1],
+                        "Regular",
+                        self.is_regular(&self.exact_font),
+                        self.regular.clone(),
+                        fonts,
+                        &mut changed,
+                    );
+                }
+            });
 
-            // Add regular option if we add other options
-            if (i != 0) && has_regular {
-                self.draw_button(
-                    &mut cols[i % self.num_col_use + 1],
-                    "Regular",
-                    self.is_regular(&self.exact_font),
-                    self.regular.clone(),
-                    fonts,
-                    &mut changed,
-                );
+            // Apply change in fonts, only if they changed (button was clicked)
+            if changed {
+                ui.ctx().set_fonts(fonts.clone());
             }
         });
-
-        // Apply change in fonts, only if they changed (button was clicked)
-        if changed {
-            ui.ctx().set_fonts(fonts.clone());
-        }
     }
 }
