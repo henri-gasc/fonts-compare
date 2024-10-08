@@ -180,16 +180,20 @@ impl Option {
         fonts: &mut egui::FontDefinitions,
         changed: &mut bool,
     ) {
-        if ui.button(text).clicked() {
-            self.exact_font = name.clone();
-            self.link_font(fonts, name);
-            *changed = true;
-        }
+        ui.vertical_centered(|ui| {
+            let button = egui::Button::new(text).min_size(ui.available_size());
+            if ui.add(button).clicked() {
+                self.exact_font = name.clone();
+                self.link_font(fonts, name);
+                *changed = true;
+            }
+        });
     }
 
     fn draw_variants(&mut self, ui: &mut egui::Ui, fonts: &mut egui::FontDefinitions) {
         let color_selected = egui::Color32::GOLD;
-        let num_columns = 3;
+        let num_columns = 5;
+        let num_col_use = 3;
         let binding = self.get_family();
         let family = binding.fonts();
         let mut changed = false;
@@ -213,7 +217,13 @@ impl Option {
                     text = text.color(color_selected);
                 }
 
-                self.draw_button(&mut cols[i % num_columns], text, name, fonts, &mut changed);
+                self.draw_button(
+                    &mut cols[i % num_col_use + 1],
+                    text,
+                    name,
+                    fonts,
+                    &mut changed,
+                );
                 i += 1;
             }
 
@@ -226,7 +236,7 @@ impl Option {
                 }
 
                 self.draw_button(
-                    &mut cols[i % num_columns],
+                    &mut cols[i % num_col_use + 1],
                     text,
                     self.regular.clone(),
                     fonts,
