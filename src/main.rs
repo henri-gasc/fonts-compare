@@ -90,13 +90,11 @@ impl eframe::App for MyApp {
                 } else {
                     ui.label("");
                 }
-                ui.horizontal(|ui| {
-                    ui.columns(2, |cols| {
-                        self.left
-                            .draw(&mut cols[0], &mut self.text, &mut self.fonts);
-                        self.right
-                            .draw(&mut cols[1], &mut self.text, &mut self.fonts);
-                    });
+                ui.columns(2, |cols| {
+                    self.left
+                        .draw(&mut cols[0], &mut self.text, &mut self.fonts);
+                    self.right
+                        .draw(&mut cols[1], &mut self.text, &mut self.fonts);
                 });
             });
         });

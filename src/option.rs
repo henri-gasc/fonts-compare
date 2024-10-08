@@ -83,16 +83,10 @@ impl Option {
         text: &mut String,
         fonts: &mut egui::FontDefinitions,
     ) {
+        self.draw_combobox(ui);
+        ui.add_space(5.0);
+
         ui.vertical_centered(|ui| {
-            // Need this, otherwise ComboBox is not centered
-            ui.columns(3, |cols| {
-                // NOTE: When name is too big, ComboBox move to the left
-                // This have to be fixed
-                self.draw_combobox(&mut cols[1]);
-            });
-
-            ui.add_space(5.0);
-
             self.write(ui, text);
 
             if self.selected != "Default" {
@@ -106,16 +100,30 @@ impl Option {
 
     fn draw_combobox(&mut self, ui: &mut egui::Ui) {
         // NOTE: Search for drop down menu we can search
-        egui::ComboBox::from_id_salt(&self.name)
-            .selected_text(self.selected.clone())
-            .show_ui(ui, |ui| {
-                ui.vertical_centered_justified(|ui| {
-                    let source = SystemSource::new();
-                    for font in source.all_families().unwrap() {
-                        ui.selectable_value(&mut self.selected, font.clone(), font.clone());
-                    }
+
+        // 20 spaces to not put the ComboBox immediatly on the left
+        let space = String::from("                    ");
+        ui.horizontal(|ui| {
+            // Put one of the space
+            ui.label(space.clone());
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::LEFT), |ui| {
+                // Put the second space on the other side
+                ui.label(space);
+                let combo = egui::ComboBox::from_id_salt(&self.name)
+                    .selected_text(self.selected.clone())
+                    .width(ui.available_width());
+                // Fill the free space with the box
+
+                combo.show_ui(ui, |ui| {
+                    ui.vertical_centered_justified(|ui| {
+                        let source = SystemSource::new();
+                        for font in source.all_families().unwrap() {
+                            ui.selectable_value(&mut self.selected, font.clone(), font.clone());
+                        }
+                    });
                 });
             });
+        });
     }
 
     fn get_family(&self) -> FamilyHandle {
