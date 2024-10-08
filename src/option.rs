@@ -172,6 +172,21 @@ impl Option {
         return "".to_string();
     }
 
+    fn draw_button(
+        &mut self,
+        ui: &mut egui::Ui,
+        text: egui::RichText,
+        name: String,
+        fonts: &mut egui::FontDefinitions,
+        changed: &mut bool,
+    ) {
+        if ui.button(text).clicked() {
+            self.exact_font = name.clone();
+            self.link_font(fonts, name);
+            *changed = true;
+        }
+    }
+
     fn draw_variants(&mut self, ui: &mut egui::Ui, fonts: &mut egui::FontDefinitions) {
         let color_selected = egui::Color32::GOLD;
         let num_columns = 3;
@@ -198,11 +213,7 @@ impl Option {
                     text = text.color(color_selected);
                 }
 
-                if cols[i % num_columns].button(text).clicked() {
-                    self.exact_font = name.clone();
-                    self.link_font(fonts, name);
-                    changed = true;
-                }
+                self.draw_button(&mut cols[i % num_columns], text, name, fonts, &mut changed);
                 i += 1;
             }
 
@@ -214,11 +225,13 @@ impl Option {
                     text = text.color(color_selected);
                 }
 
-                if cols[i % num_columns].button(text).clicked() {
-                    self.exact_font = self.regular.clone();
-                    self.link_font(fonts, self.regular.clone());
-                    changed = true;
-                }
+                self.draw_button(
+                    &mut cols[i % num_columns],
+                    text,
+                    self.regular.clone(),
+                    fonts,
+                    &mut changed,
+                );
             }
         });
 
