@@ -173,13 +173,14 @@ impl Option {
     }
 
     fn draw_variants(&mut self, ui: &mut egui::Ui, fonts: &mut egui::FontDefinitions) {
+        let color_selected = egui::Color32::GOLD;
         let num_columns = 3;
         let binding = self.get_family();
         let family = binding.fonts();
         let mut changed = false;
+        let mut is_regular = true;
 
         ui.columns(num_columns, |cols| {
-            // egui::Grid::new(format!("{}-grid", self.name)).show(ui, |ui| {
             let mut i = 0;
             for handle in family {
                 let font = handle.load().unwrap();
@@ -188,8 +189,14 @@ impl Option {
                 if (var == "") || (name == self.selected) || name.ends_with("-Regular") {
                     continue;
                 }
+                // Change color if selected
+                let mut text = egui::RichText::new(var);
+                if name == self.exact_font {
+                    is_regular = false;
+                    text = text.color(color_selected);
+                }
 
-                if cols[i % num_columns].button(var).clicked() {
+                if cols[i % num_columns].button(text).clicked() {
                     self.exact_font = name.clone();
                     self.link_font(fonts, name);
                     changed = true;
@@ -197,9 +204,15 @@ impl Option {
                 i += 1;
             }
 
+            // Add regular option if we add other options
             if i != 0 {
-                // Always add regular option
-                if cols[i % num_columns].button("Regular").clicked() {
+                // Change color if selected
+                let mut text = egui::RichText::new("Regular");
+                if is_regular {
+                    text = text.color(color_selected);
+                }
+
+                if cols[i % num_columns].button(text).clicked() {
                     self.exact_font = self.regular.clone();
                     self.link_font(fonts, self.regular.clone());
                     changed = true;
