@@ -26,6 +26,9 @@ pub struct Option {
     pub selected: String,
     pub exact_font: String,
     pub regular: String,
+    pub color_selected: egui::Color32,
+    pub num_columns: usize,
+    pub num_col_use: usize,
 }
 
 impl Default for Option {
@@ -35,6 +38,9 @@ impl Default for Option {
             selected: "Default".to_string(),
             exact_font: "".to_string(),
             regular: "".to_string(),
+            color_selected: egui::Color32::GOLD,
+            num_columns: 5,
+            num_col_use: 3,
         };
     }
 }
@@ -172,16 +178,27 @@ impl Option {
         return "".to_string();
     }
 
+    fn get_text(&self, text: &str, condition: bool) -> egui::RichText {
+        let mut rich = egui::RichText::new(text);
+        if condition {
+            rich = rich.color(self.color_selected);
+        }
+        return rich;
+    }
+
     fn draw_button(
         &mut self,
         ui: &mut egui::Ui,
-        text: egui::RichText,
+        text: &str,
+        condition: bool,
         name: String,
         fonts: &mut egui::FontDefinitions,
         changed: &mut bool,
     ) {
+        let rich = self.get_text(text, condition);
+
         ui.vertical_centered(|ui| {
-            let button = egui::Button::new(text).min_size(ui.available_size());
+            let button = egui::Button::new(rich).min_size(ui.available_size());
             if ui.add(button).clicked() {
                 self.exact_font = name.clone();
                 self.link_font(fonts, name);
@@ -190,36 +207,32 @@ impl Option {
         });
     }
 
+    fn is_regular(&self, name: &str) -> bool {
+        let var = self.variance(name);
+        return (var == "") || (name == self.selected) || name.ends_with("-Regular");
+    }
+
     fn draw_variants(&mut self, ui: &mut egui::Ui, fonts: &mut egui::FontDefinitions) {
-        let color_selected = egui::Color32::GOLD;
-        let num_columns = 5;
-        let num_col_use = 3;
         let binding = self.get_family();
         let family = binding.fonts();
         let mut changed = false;
-        let mut is_regular = true;
         let mut has_regular = false;
 
-        ui.columns(num_columns, |cols| {
+        ui.columns(self.num_columns, |cols| {
             let mut i = 0;
             for handle in family {
                 let font = handle.load().unwrap();
                 let name = font.postscript_name().unwrap_or(self.exact_font.clone());
                 let var = self.variance(&name);
-                if (var == "") || (name == self.selected) || name.ends_with("-Regular") {
+                if self.is_regular(&name) {
                     has_regular = true;
                     continue;
                 }
-                // Change color if selected
-                let mut text = egui::RichText::new(var);
-                if name == self.exact_font {
-                    is_regular = false;
-                    text = text.color(color_selected);
-                }
 
                 self.draw_button(
-                    &mut cols[i % num_col_use + 1],
-                    text,
+                    &mut cols[i % self.num_col_use + 1],
+                    &var,
+                    name == self.exact_font,
                     name,
                     fonts,
                     &mut changed,
@@ -229,15 +242,10 @@ impl Option {
 
             // Add regular option if we add other options
             if (i != 0) && has_regular {
-                // Change color if selected
-                let mut text = egui::RichText::new("Regular");
-                if is_regular {
-                    text = text.color(color_selected);
-                }
-
                 self.draw_button(
-                    &mut cols[i % num_col_use + 1],
-                    text,
+                    &mut cols[i % self.num_col_use + 1],
+                    "Regular",
+                    self.is_regular(&self.exact_font),
                     self.regular.clone(),
                     fonts,
                     &mut changed,
