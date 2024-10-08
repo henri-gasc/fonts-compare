@@ -173,10 +173,11 @@ impl Option {
     }
 
     fn draw_variants(&mut self, ui: &mut egui::Ui, fonts: &mut egui::FontDefinitions) {
+        let num_columns = 3;
         let binding = self.get_family();
         let family = binding.fonts();
 
-        ui.columns(3, |cols| {
+        ui.columns(num_columns, |cols| {
             // egui::Grid::new(format!("{}-grid", self.name)).show(ui, |ui| {
             let mut i = 0;
             for handle in family {
@@ -187,18 +188,17 @@ impl Option {
                     continue;
                 }
 
-                if cols[i].button(var).clicked() {
+                if cols[i % num_columns].button(var).clicked() {
                     self.exact_font = name.clone();
                 }
                 i += 1;
-                if i == 3 {
-                    i = 0;
-                }
             }
 
-            // Always add regular option
-            if cols[i].button("Regular").clicked() {
-                self.exact_font = self.regular.clone();
+            if i != 0 {
+                // Always add regular option
+                if cols[i % num_columns].button("Regular").clicked() {
+                    self.exact_font = self.regular.clone();
+                }
             }
         });
     }
