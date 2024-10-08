@@ -186,13 +186,13 @@ impl Option {
         return "".to_string();
     }
 
-    fn font_name(&self, name: &str) -> String {
-        let mut end = name.len();
-        if let Some(n) = name.find('-') {
-            end = n;
-        }
-        return name[..end].to_string();
-    }
+    // fn font_name(&self, name: &str) -> String {
+    //     let mut end = name.len();
+    //     if let Some(n) = name.find('-') {
+    //         end = n;
+    //     }
+    //     return name[..end].to_string();
+    // }
 
     fn get_text(&self, text: &str, condition: bool) -> egui::RichText {
         let mut rich = egui::RichText::new(text);
