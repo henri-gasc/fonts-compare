@@ -159,7 +159,7 @@ impl Option {
             let data = font.copy_font_data().unwrap().to_vec();
             fonts
                 .font_data
-                .insert(poss_font.clone(), egui::FontData::from_owned(data));
+                .insert(poss_font.clone(), egui::FontData::from_owned(data).into());
         }
         self.link_font(fonts, new_font.clone());
 
